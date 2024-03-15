@@ -1,0 +1,32 @@
+version: '3.9'
+
+services:
+  postgres:
+    container_name: hr_db
+    image: postgres:latest
+    volumes:
+      - postgres_data_database:/var/lib/postgresql/data/
+    env_file:
+      - ${PWD}/.env
+    environment:
+      POSTGRES_USER: ${RDS_USERNAME}
+      POSTGRES_PASSWORD: ${RDS_PASSWORD}
+      POSTGRES_DB: ${RDS_DB_NAME}
+    ports:
+      - ${RDS_EXTERNAL_PORT}:${RDS_PORT}
+    expose:
+      - ${RDS_EXTERNAL_PORT}
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${RDS_USERNAME}"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+    networks:
+      - human-recognizer-net
+
+volumes:
+  postgres_data_database:
+
+networks:
+  human-recognizer-net:
+    driver: bridge
