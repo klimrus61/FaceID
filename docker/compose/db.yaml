@@ -9,15 +9,15 @@ services:
     env_file:
       - ${PWD}/.env
     environment:
-      POSTGRES_USER: ${RDS_USERNAME}
-      POSTGRES_PASSWORD: ${RDS_PASSWORD}
-      POSTGRES_DB: ${RDS_DB_NAME}
+      POSTGRES_USER: ${POSTGRESQL_USERNAME}
+      POSTGRES_PASSWORD: ${POSTGRESQL_PASSWORD}
+      POSTGRES_DB: ${POSTGRESQL_DB_NAME}
     ports:
-      - ${RDS_EXTERNAL_PORT}:${RDS_PORT}
+      - ${POSTGRESQL_EXTERNAL_PORT}:${POSTGRESQL_PORT}
     expose:
-      - ${RDS_EXTERNAL_PORT}
+      - ${POSTGRESQL_EXTERNAL_PORT}
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U ${RDS_USERNAME}"]
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRESQL_USERNAME}"]
       interval: 5s
       timeout: 5s
       retries: 10

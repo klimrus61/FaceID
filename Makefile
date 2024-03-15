@@ -3,9 +3,9 @@
 compose_directory = docker/compose
 docker_v2 = docker compose
 
-main_container = -f $(compose_directory)/main.yml
-app_container = -f $(compose_directory)/app.yml
-db_container = -f $(compose_directory)/db.yml
+main_container = -f $(compose_directory)/main.yaml
+app_container = -f $(compose_directory)/app.yaml
+db_container = -f $(compose_directory)/db.yaml
 
 compose_application := $(docker_v2) $(main_container) $(db_container) $(app_container) --env-file .env
 
