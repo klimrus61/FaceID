@@ -11,6 +11,8 @@ fastapi = "^0.110.0"
 uvicorn = "^0.28.0"
 pydantic-settings = "^2.2.1"
 sqlalchemy = "^2.0.28"
+fastapi-storages = "^0.3.0"
+sqlalchemy-stubs = "^0.4"
 
 
 [tool.poetry.group.dev.dependencies]

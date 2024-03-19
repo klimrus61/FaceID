@@ -40,7 +40,5 @@ logs:
 prune:
 	docker system prune --all --force --volumes
 
-
-
 # ===================================DOCKER(MANAGE APPLICATION)===================================
 
