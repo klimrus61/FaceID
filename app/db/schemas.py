@@ -2,12 +2,7 @@ from fastapi import UploadFile
 from pydantic import BaseModel
 
 #
-# class UserBase(BaseModel):
-#     email: str
-#
-#
-# class UserCreate(UserBase):
-#     password: str
+
 #
 #
 # class UserForPhoto(UserBase):
@@ -41,9 +36,16 @@ from pydantic import BaseModel
 #         orm_mode = True
 
 
-class User(BaseModel):
-    username: str
-    email: str | None = None
+class UserBase(BaseModel):
+    email: str
+
+
+class UserCreate(UserBase):
+    password: str
+
+
+class User(UserBase):
+    id: int
     full_name: str | None = None
     is_active: bool | None = None
 
@@ -76,4 +78,4 @@ class Token(BaseModel):
 
 
 class TokenData(BaseModel):
-    username: str | None = None
+    email: str | None = None

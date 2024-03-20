@@ -2,6 +2,8 @@ from fastapi import FastAPI
 
 from app.api.main import api_router
 from app.core.config import settings
+from app.db import models
+from app.db.database import engine
 
 # # to get a string like this run:
 # # openssl rand -hex 32
@@ -9,6 +11,7 @@ from app.core.config import settings
 # ALGORITHM = "HS256"
 # ACCESS_TOKEN_EXPIRE_MINUTES = 30
 
+models.Base.metadata.create_all(bind=engine)
 
 app = FastAPI()
 
