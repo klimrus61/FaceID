@@ -13,17 +13,6 @@ from app.db.schemas import TokenData, User
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl=f"{settings.API_V1_STR}/token")
 
 
-fake_users_db = {
-    "johndoe": {
-        "username": "johndoe",
-        "full_name": "John Doe",
-        "email": "johndoe@example.com",
-        "hashed_password": "$2b$12$EixZaYVK1fsbw1ZfbX3OXePaWxn96p36WQoeG6Lruj3vjPGga31lW",
-        "is_active": True,
-    }
-}
-
-
 async def get_current_user(
     session: Annotated[Session, Depends(get_db)],
     token: Annotated[str, Depends(oauth2_scheme)],
