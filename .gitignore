@@ -259,3 +259,5 @@ media/
 staticfiles/
 
 db.json
+sql_app.db
+tmp/

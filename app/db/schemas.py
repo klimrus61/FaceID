@@ -1,30 +1,34 @@
 from fastapi import UploadFile
 from pydantic import BaseModel
 
-#
 
-#
-#
-# class UserForPhoto(UserBase):
-#     id: int
-#     is_active: bool
-#
-#
-# class PhotoBase(BaseModel):
-#     title: str
-#     description: str | None = None
-#     file: UploadFile
-#
-#
-# class PhotoCreate(PhotoBase):
-#     pass
-#
-#
-# class Photo(PhotoBase):
-#     id: int
-#     album_id: int
-#     owner_id: int
-#     users: list[UserForPhoto]
+class UserBase(BaseModel):
+    email: str
+
+
+class UserForPhoto(UserBase):
+    id: int
+    is_active: bool
+
+
+class PhotoBase(BaseModel):
+    title: str
+    description: str | None
+
+
+class PhotoCreate(PhotoBase):
+    file: UploadFile
+    pass
+
+
+class Photo(PhotoBase):
+    id: int
+    file: str
+    album_id: int | None = None
+    owner_id: int
+    users: list[UserForPhoto] | None
+
+
 #
 #
 # class User(UserBase):
@@ -34,10 +38,6 @@ from pydantic import BaseModel
 #
 #     class Config:
 #         orm_mode = True
-
-
-class UserBase(BaseModel):
-    email: str
 
 
 class UserCreate(UserBase):
