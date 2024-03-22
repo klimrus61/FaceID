@@ -260,4 +260,6 @@ staticfiles/
 
 db.json
 sql_app.db
+*.db
+test_main.http
 tmp/

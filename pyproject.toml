@@ -18,6 +18,8 @@ python-multipart = "^0.0.9"
 python-jose = {extras = ["cryptography"], version = "^3.3.0"}
 passlib = {extras = ["bcrypt@4.0.1"], version = "^1.7.4"}
 pillow = "^10.2.0"
+pytest = {extras = ["httpx"], version = "^8.1.1"}
+httpx = "^0.27.0"
 
 
 [tool.poetry.group.dev.dependencies]
@@ -32,3 +34,15 @@ build-backend = "poetry.core.masonry.api"
 
 [tool.isort]
 profile = "black"
+
+[tool.pytest.ini_options]
+addopts = "-vv -x --lf --color=yes"
+console_output_style = "progress"
+testpaths = [
+    "./vacancy_provider/tests/"
+]
+python_files = [
+    "test_*.py",
+    "tests.py",
+    "*_test.py",
+]

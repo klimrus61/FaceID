@@ -52,6 +52,15 @@ def create_photo(
     return db_photo
 
 
+def get_photo(session: Session, photo_id: int):
+    return session.get(models.Photo, photo_id)
+
+
+def delete_photo(session: Session, photo: models.Photo):
+    session.delete(photo)
+    session.commit()
+
+
 def get_user_photos(
     session: Session, user: models.User, skip: int, limit: int
 ) -> list[models.Photo]:
