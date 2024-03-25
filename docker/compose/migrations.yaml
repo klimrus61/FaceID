@@ -1,0 +1,25 @@
+version: "3.9"
+
+services:
+  db_migrations:
+    container_name: hr_db_migrations
+    image: hr-app
+    build:
+      context: ${PWD}
+      dockerfile: docker/Dockerfile
+    command: >
+      bash -c "alembic upgrade head"
+    volumes:
+      - ${PWD}/:/humanRecognizer
+    env_file:
+      - ${PWD}/.env
+    depends_on:
+      postgres:
+        condition: service_healthy
+    networks:
+      - human-recognizer-net
+
+
+networks:
+  human-recognizer-net:
+    driver: bridge
