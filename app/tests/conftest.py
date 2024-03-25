@@ -3,6 +3,7 @@ import sqlalchemy as sa
 from fastapi.testclient import TestClient
 from sqlalchemy.orm import sessionmaker
 
+from app.core.config import settings
 from app.db.database import Base, get_db
 from app.main import app
 
