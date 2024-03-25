@@ -1,5 +1,3 @@
-version: "3.9"
-
 services:
   db_migrations:
     container_name: hr_db_migrations
