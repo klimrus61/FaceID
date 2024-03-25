@@ -54,24 +54,6 @@ class UserInDB(User):
     hashed_password: str
 
 
-#
-# class AlbumBase(BaseModel):
-#     title: str
-#     description: str | None = None
-#
-#
-# class AlbumCreate(AlbumBase):
-#     pass
-#
-#
-# class Album(AlbumBase):
-#     is_display: bool = True
-#     photos: list[Photo] = []
-#
-#     class Config:
-#         orm_mode = True
-
-
 class Token(BaseModel):
     access_token: str
     token_type: str
@@ -79,3 +61,21 @@ class Token(BaseModel):
 
 class TokenData(BaseModel):
     email: str | None = None
+
+
+class AlbumBase(BaseModel):
+    title: str
+    description: str | None = None
+
+
+class AlbumCreate(AlbumBase):
+    pass
+
+
+class AlbumUpdate(AlbumBase):
+    is_display: bool
+
+
+class Album(AlbumBase):
+    is_display: bool = True
+    photos: list[Photo] = []

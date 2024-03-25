@@ -22,6 +22,7 @@ class User(Base):
 
     photos = relationship("Photo", secondary="user_to_photo", back_populates="users")
     own_photos = relationship("Photo", back_populates="owner")
+    own_albums = relationship("Album", back_populates="owner")
 
 
 class Album(Base):
@@ -31,8 +32,10 @@ class Album(Base):
     title = Column(String, index=True)
     description = Column(String)
     is_display = Column(Boolean, default=True)
+    owner_id = Column(Integer, ForeignKey("users.id"))
 
     photos = relationship("Photo", back_populates="album")
+    owner = relationship("User", back_populates="own_albums")
 
 
 class Photo(Base):
