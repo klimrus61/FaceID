@@ -42,6 +42,15 @@ restart:
 logs:
 	$(compose_application) logs -f
 
+.PHONY: destroy
+destroy:
+	$(compose_application) down -v
+	$(compose_migrations) down -v
+	$(compose_population) down -v
+#	$(compose_tests) down -v
+#	$(con)
+
+
 .PHONY: prune
 prune:
 	docker system prune --all --force --volumes
