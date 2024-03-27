@@ -31,7 +31,7 @@ app:
 .PHONY: down
 down:
 	$(compose_application) down
-	$(compose_population) down
+	#$(compose_population) down
 
 .PHONY: restart
 restart:
