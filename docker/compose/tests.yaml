@@ -1,0 +1,28 @@
+services:
+  tests:
+    container_name: hr_tests
+    image: hr-tests
+    build:
+      context: ${PWD}
+      dockerfile: docker/Dockerfile
+    command: >
+      bash -c "pytest &&
+      rm -r tmp"
+    volumes:
+      - ${PWD}/:/app
+    env_file:
+      - ${PWD}/.env
+#    environment:
+#      - DJANGO_TESTS_RUNNING=1
+    depends_on:
+      postgres:
+        condition: service_healthy
+#      redis:
+#        condition: service_healthy
+    networks:
+      - human-recognizer-net
+
+
+networks:
+  human-recognizer-net:
+    driver: bridge

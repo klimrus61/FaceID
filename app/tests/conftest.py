@@ -8,7 +8,7 @@ from app.core.config import settings
 from app.db.database import Base, get_db
 from app.main import app
 
-SQLALCHEMY_DATABASE_URL = f"postgresql+psycopg://{settings.POSTGRESQL_USERNAME}:{settings.POSTGRESQL_PASSWORD}@localhost:6694/"
+SQLALCHEMY_DATABASE_URL = f"postgresql+psycopg://{settings.POSTGRESQL_USERNAME}:{settings.POSTGRESQL_PASSWORD}@{settings.POSTGRESQL_HOSTNAME}:{settings.POSTGRESQL_PORT}/"
 
 engine = sa.create_engine(SQLALCHEMY_DATABASE_URL)
 TestingSessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
