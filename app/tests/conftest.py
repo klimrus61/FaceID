@@ -1,49 +1,41 @@
 import pytest
-import sqlalchemy as sa
 from fastapi.testclient import TestClient
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 
 from app.core.config import settings
-from app.db.database import Base, get_db
+from app.db.database import get_db
 from app.main import app
 
 SQLALCHEMY_DATABASE_URL = f"postgresql+psycopg://{settings.POSTGRESQL_USERNAME}:{settings.POSTGRESQL_PASSWORD}@{settings.POSTGRESQL_HOSTNAME}:{settings.POSTGRESQL_PORT}/"
 
-engine = sa.create_engine(SQLALCHEMY_DATABASE_URL)
-TestingSessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
+# global application scope.  create Session class, engine
+Session = sessionmaker()
 
-# Set up the database once
-Base.metadata.drop_all(bind=engine)
-Base.metadata.create_all(bind=engine)
+engine = create_engine(SQLALCHEMY_DATABASE_URL)
 
 
-# This fixture is the main difference to before. It creates a nested
-# transaction, recreates it when the application code calls session.commit
-# and rolls it back at the end.
-# Based on: https://docs.sqlalchemy.org/en/14/orm/session_transaction.html#joining-a-session-into-an-external-transaction-such-as-for-test-suites
-@pytest.fixture()
+@pytest.fixture
 def session():
+    # connect to the database
     connection = engine.connect()
-    transaction = connection.begin()
-    session = TestingSessionLocal(bind=connection)
 
-    # Begin a nested transaction (using SAVEPOINT).
-    nested = connection.begin_nested()
+    # begin a non-ORM transaction
+    trans = connection.begin()
 
-    # If the application code calls session.commit, it will end the nested
-    # transaction. Need to start a new one when that happens.
-    @sa.event.listens_for(session, "after_transaction_end")
-    def end_savepoint(session, transaction):
-        nonlocal nested
-        if not nested.is_active:
-            nested = connection.begin_nested()
-
+    # bind an individual Session to the connection, selecting
+    # "create_savepoint" join_transaction_mode
+    session = Session(bind=connection, join_transaction_mode="create_savepoint")
     yield session
 
-    # Rollback the overall transaction, restoring the state before the test ran.
     session.close()
-    transaction.rollback()
+
+    # rollback - everything that happened with the
+    # Session above (including calls to commit())
+    # is rolled back.
+    trans.rollback()
+
+    # return connection to the Engine
     connection.close()
 
 
