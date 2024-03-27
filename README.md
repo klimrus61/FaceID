@@ -27,6 +27,47 @@
     :exclamation: make sure that the app is **running** prior to accessing swagger
 
 
+### **Testing your code**
+
+We run tests through github actions on every push and pull request that you make. Make sure to run tests before you commit changes to your branch using the Makefile command:
+
+```bash
+make tests
+```
+
+:exclamation: Every new peace of code that you write, whether its a new exception handler in an existing endpoint or a new endpoint overall, make sure to cover it with tests.
+
+## Docker
+
+In the project root directory you can find the **docker** folder. In **/compose** folder are located **.yml** files with container configurations.
+
+- migrations.yml
+- dbpopulation.yml
+- redis.yml
+- app.yml
+- main.yml
+- worker.yml
+- db.yml
+- tests.yml
+
+You can see a full list of configurations in these files.
+
+We run dockerfiles through **MakeFile** which makes the command promt for building multiple containers as simple and as short as:
+
+```bash
+make build # building the whole project
+```
+
+or
+
+```bash
+make db # building just the database
+```
+
+You can see the full list of make commands in **Makefile** in project root directory.
+
+## That's all folks, have fun
+
 alembic usage 
 - alembic revision --autogenerate -m "Added initial table"
 - alembic upgrade head

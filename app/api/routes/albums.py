@@ -27,7 +27,7 @@ async def get_user_albums_by_id(
     return get_user_albums(session, user_id, skip, limit)
 
 
-@router.post("/create")
+@router.post("/create", status_code=status.HTTP_201_CREATED)
 async def create_album_to_user(
     session: Annotated[Session, Depends(get_db)],
     user: Annotated[User, Depends(get_current_active_user)],

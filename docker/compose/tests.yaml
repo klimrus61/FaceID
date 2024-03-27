@@ -6,10 +6,10 @@ services:
       context: ${PWD}
       dockerfile: docker/Dockerfile
     command: >
-      bash -c "pytest &&
+      bash -c "pytest app &&
       rm -r tmp"
     volumes:
-      - ${PWD}/:/app
+      - ${PWD}/:/humanRecognizer
     env_file:
       - ${PWD}/.env
 #    environment:
