@@ -14,7 +14,7 @@ def get_user(session: Session, user_id: int):
     return session.query(models.User).filter(models.User.id == user_id).first()
 
 
-def get_user_by_email(session: Session, email: str) -> models.User:
+def get_user_by_email(session: Session, email: str):
     return session.query(models.User).filter(models.User.email == email).first()
 
 
@@ -41,11 +41,7 @@ def authenticate_user(session: Session, email: str, password: str):
 # ================================= Photo ============================================
 
 
-def create_photo(
-    session: Session,
-    photo: schemas.PhotoCreate,
-    owner: Annotated[models.User, Depends(get_user_by_email)],
-):
+def create_photo(session: Session, photo: schemas.PhotoCreate, owner: schemas.User):
     db_photo = models.Photo(**photo.dict(), owner_id=owner.id)
     session.add(db_photo)
     session.commit()
@@ -63,7 +59,7 @@ def delete_photo(session: Session, photo: models.Photo):
 
 
 def get_user_photos(
-    session: Session, user: models.User, skip: int, limit: int
+    session: Session, user: schemas.User, skip: int, limit: int
 ) -> list[models.Photo]:
     return (
         session.query(models.Photo)
