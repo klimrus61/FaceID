@@ -1,12 +1,17 @@
+import io
 from datetime import timedelta
 from typing import NamedTuple
 
 import pytest
 from faker import Faker
+from fastapi import UploadFile
+from fastapi.security import OAuth2PasswordRequestForm
+from PIL import Image
 
 from app.core.config import settings
-from app.db.models import Album, User
-from app.db.schemas import Token, UserCreate
+from app.db.models import Album, Photo, User
+from app.db.schemas import Token
+from app.main import app
 from app.utils import create_access_token, get_password_hash
 
 faker = Faker()
@@ -45,6 +50,17 @@ def token(user):
     return Token(access_token=access_token, token_type="bearer")
 
 
+@pytest.fixture
+def album(session, user):
+    title = faker.name()
+    description = faker.text()
+    album = Album(title=title, description=description, owner_id=user.id)
+    session.add(album)
+    session.commit()
+    session.refresh(album)
+    return album
+
+
 class TestUsersApi:
 
     def test_create_user(self, client):
@@ -76,15 +92,6 @@ class TestUsersApi:
 
 
 class TestAlbumApi:
-    @pytest.fixture()
-    def album(self, session, user):
-        title = faker.name()
-        description = faker.text()
-        album = Album(title=title, description=description, owner_id=user.id)
-        session.add(album)
-        session.commit()
-        session.refresh(album)
-        return album
 
     def test_get_user_albums(self, client, album, user):
         response = client.get(
@@ -152,8 +159,101 @@ class TestAlbumApi:
 
 
 class TestLoginApi:
-    pass
+    class FormData(NamedTuple):
+        username: str
+        password: str
+
+    @pytest.fixture(autouse=True)
+    def override_dependency_auth_form(self, user):
+        def override_OAuth2PasswordRequestForm():
+            return self.FormData(username=user.email, password=user.password)
+
+        app.dependency_overrides[OAuth2PasswordRequestForm] = (
+            override_OAuth2PasswordRequestForm
+        )
+        yield
+        del app.dependency_overrides[OAuth2PasswordRequestForm]
+
+    def test_login(self, client):
+        response = client.post(f"{api_url}/token")
+
+        assert response.status_code == 200
+        token: Token = response.json()
+        assert "access_token" in token
 
 
 class TestPhotoApi:
-    pass
+    @pytest.fixture
+    def binary_image(self):
+        img = Image.new("RGB", (100, 100))
+        in_memory = io.BytesIO()
+        img.save(in_memory, format="PNG")
+        return in_memory
+
+    @pytest.fixture(autouse=True)
+    def photo_in_db(self, session, user, binary_image):
+        title = faker.file_name(category="image")
+        photo = Photo(
+            title=title,
+            description=faker.text(),
+            owner_id=user.id,
+            file=UploadFile(
+                filename=title,
+                file=binary_image,
+            ),
+        )
+        session.add(photo)
+        session.commit()
+        session.refresh(photo)
+        return photo
+
+    def test_create_photo(self, client, token, binary_image):
+        multipart_form_data = {
+            "title": (None, faker.name()),
+            "description": (None, faker.text()),
+            "file": (faker.file_name(category="image"), binary_image),
+        }
+        response = client.post(
+            f"{api_url}/photos/create",
+            files=multipart_form_data,
+            headers={"Authorization": f"Bearer {token.access_token}"},
+        )
+
+        assert (
+            response.status_code == 200
+            and response.json().get("title") == multipart_form_data["title"][-1]
+        )
+
+    def test_get_user_photos(self, client, token):
+        response = client.get(
+            f"{api_url}/photos/",
+            headers={"Authorization": f"Bearer {token.access_token}"},
+            params={"skip": 0, "limit": 100},
+        )
+
+        assert response.status_code == 200 and len(response.json()) == 1
+
+    def test_delete_photo(self, session, client, token, photo_in_db):
+        response = client.delete(
+            f"{api_url}/photos/{photo_in_db.id}/delete",
+            headers={"Authorization": f"Bearer {token.access_token}"},
+        )
+
+        assert (
+            response.status_code == 204 and session.get(Photo, photo_in_db.id) is None
+        )
+
+    def test_set_album_to_photo(self, session, client, token, album, photo_in_db):
+        assert session.get(Photo, photo_in_db.id).album_id is None
+
+        response = client.patch(
+            f"{api_url}/photos/{photo_in_db.id}/set-album",
+            headers={"Authorization": f"Bearer {token.access_token}"},
+            params={"album_id": album.id},
+        )
+
+        assert (
+            response.status_code == 200
+            and session.get(Photo, photo_in_db.id).album_id == album.id
+            and response.json().get("id") == photo_in_db.id
+        )
