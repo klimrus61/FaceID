@@ -39,7 +39,7 @@ async def add_photo_to_current_user(
     file: Annotated[UploadFile, File()],
 ):
     photo_in = PhotoCreate(title=title, description=description, file=file)
-    return create_photo(session, photo=photo_in, owner=user)
+    return create_photo(session, photo=photo_in, uploaded_by=user)
 
 
 @router.delete("/{photo_id}/delete", status_code=status.HTTP_204_NO_CONTENT)
@@ -53,7 +53,7 @@ async def delete_photo_by_id(
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
         )
-    if not photo.owner == user:
+    if not photo.uploaded_by == user:
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
             detail="You do not have permission to delete this photo",
@@ -82,7 +82,7 @@ async def patch_photo_me(
     photo_id: int,
 ):
     photo = get_photo(session, photo_id)
-    if photo.owner != user:
+    if photo.uploaded_by != user:
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
             detail="You do not have permission to delete this photo",

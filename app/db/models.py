@@ -20,8 +20,8 @@ class User(Base):
     hashed_password = Column(String)
     is_active = Column(Boolean, default=True)
 
-    photos = relationship("Photo", secondary="user_to_photo", back_populates="users")
-    own_photos = relationship("Photo", back_populates="owner")
+    on_photos = relationship("Photo", secondary="user_to_photo", back_populates="users")
+    uploaded_photos = relationship("Photo", back_populates="uploaded_by")
     own_albums = relationship("Album", back_populates="owner")
 
 
@@ -46,8 +46,8 @@ class Photo(Base):
     description = Column(String)
     file = Column(ImageType(storage=storage))
     album_id = Column(Integer, ForeignKey("albums.id"))
-    owner_id = Column(Integer, ForeignKey("users.id"))
+    uploaded_by_id = Column(Integer, ForeignKey("users.id"))
 
-    owner = relationship("User", back_populates="own_photos")
+    uploaded_by = relationship("User", back_populates="uploaded_photos")
     album = relationship("Album", back_populates="photos")
-    users = relationship("User", secondary="user_to_photo", back_populates="photos")
+    users = relationship("User", secondary="user_to_photo", back_populates="on_photos")

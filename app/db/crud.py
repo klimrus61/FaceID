@@ -1,12 +1,7 @@
-from typing import Annotated
-
-from fastapi import Depends
 from sqlalchemy import update
 from sqlalchemy.orm import Session
-from sqlalchemy.sql.functions import user
 
 from app.db import models, schemas
-from app.db.models import user_to_photo
 from app.utils import get_password_hash, verify_password
 
 # ================================= User ============================================
@@ -43,8 +38,10 @@ def authenticate_user(session: Session, email: str, password: str):
 # ================================= Photo ============================================
 
 
-def create_photo(session: Session, photo: schemas.PhotoCreate, owner: schemas.User):
-    db_photo = models.Photo(**photo.dict(), owner_id=owner.id)
+def create_photo(
+    session: Session, photo: schemas.PhotoCreate, uploaded_by: schemas.User
+):
+    db_photo = models.Photo(**photo.dict(), uploaded_by_id=uploaded_by.id)
     session.add(db_photo)
     session.commit()
     session.refresh(db_photo)
@@ -65,7 +62,7 @@ def get_user_photos(
 ) -> list[models.Photo]:
     return (
         session.query(models.Photo)
-        .filter(models.Photo.owner == user)
+        .filter(models.Photo.uploaded_by == user)
         .offset(skip)
         .limit(limit)
         .all()
@@ -87,14 +84,14 @@ def change_photo_album(
 async def get_single_owner_photos(session: Session, user: schemas.User):
     return (
         session.query(models.Photo)
-        .filter(models.Photo.owner == user)
+        .filter(models.Photo.uploaded_by == user)
         .filter(models.Photo.users.any(id=user.id))
         .all()
     )
 
 
 async def set_on_photo_only_owner(session: Session, photo: models.Photo):
-    photo.users.append(photo.owner)
+    photo.users.append(photo.uploaded_by)
     session.add(photo)
     session.commit()
     session.refresh(photo)

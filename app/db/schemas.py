@@ -25,7 +25,7 @@ class Photo(PhotoBase):
     id: int
     file: str
     album_id: int | None = None
-    owner_id: int
+    uploaded_by_id: int
     users: list[UserForPhoto] | None
 
 

@@ -49,7 +49,7 @@ class TestPhoto:
         photo = create_photo(
             session,
             PhotoCreate(title=title, description=description, file=image),
-            owner=photo_owner,
+            uploaded_by=photo_owner,
         )
         assert hasattr(photo, "id") and photo.file.name == image.filename
 
