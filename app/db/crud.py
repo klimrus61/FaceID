@@ -3,8 +3,10 @@ from typing import Annotated
 from fastapi import Depends
 from sqlalchemy import update
 from sqlalchemy.orm import Session
+from sqlalchemy.sql.functions import user
 
 from app.db import models, schemas
+from app.db.models import user_to_photo
 from app.utils import get_password_hash, verify_password
 
 # ================================= User ============================================
@@ -76,6 +78,23 @@ def change_photo_album(
     album_id: int,
 ):
     photo.album_id = album_id
+    session.add(photo)
+    session.commit()
+    session.refresh(photo)
+    return photo
+
+
+async def get_single_owner_photos(session: Session, user: schemas.User):
+    return (
+        session.query(models.Photo)
+        .filter(models.Photo.owner == user)
+        .filter(models.Photo.users.any(id=user.id))
+        .all()
+    )
+
+
+async def set_on_photo_only_owner(session: Session, photo: models.Photo):
+    photo.users.append(photo.owner)
     session.add(photo)
     session.commit()
     session.refresh(photo)
