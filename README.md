@@ -26,10 +26,17 @@
 
     :exclamation: make sure that the app is **running** prior to accessing swagger
 
+### **Alembic usage**
+
+- alembic revision --autogenerate -m "Added initial table"
+- alembic upgrade head
+- alembic downgrade ...
+
 
 ### **Testing your code**
 
-We run tests through github actions on every push and pull request that you make. Make sure to run tests before you commit changes to your branch using the Makefile command:
+[!IMPORTANT]
+> Before running tests you have to create test db **hr_test_db** or rewrite db_url for your tests in app.tests.conftest.py
 
 ```bash
 make tests
@@ -67,8 +74,3 @@ make db # building just the database
 You can see the full list of make commands in **Makefile** in project root directory.
 
 ## That's all folks, have fun
-
-alembic usage 
-- alembic revision --autogenerate -m "Added initial table"
-- alembic upgrade head
-- alembic downgrade ...
