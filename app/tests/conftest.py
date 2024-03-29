@@ -11,7 +11,7 @@ from app.db.database import Base, get_db
 from app.main import app
 from app.utils import get_password_hash
 
-SQLALCHEMY_DATABASE_URL = f"postgresql+psycopg://{settings.POSTGRESQL_USERNAME}:{settings.POSTGRESQL_PASSWORD}@{settings.POSTGRESQL_HOSTNAME}:{settings.POSTGRESQL_PORT}/test_db"
+SQLALCHEMY_DATABASE_URL = f"postgresql+psycopg://{settings.POSTGRESQL_USERNAME}:{settings.POSTGRESQL_PASSWORD}@{settings.POSTGRESQL_HOSTNAME}:{settings.POSTGRESQL_PORT}/hr_test_db"
 
 # global application scope.  create Session class, engine
 Session = sessionmaker()
