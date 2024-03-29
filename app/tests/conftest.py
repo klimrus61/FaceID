@@ -1,3 +1,5 @@
+import tempfile
+
 import pytest
 from faker import Faker
 from fastapi.testclient import TestClient
@@ -5,12 +7,11 @@ from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 
 from app.core.config import settings
-from app.db.database import get_db
-from app.db.models import User
+from app.db.database import Base, get_db
 from app.main import app
 from app.utils import get_password_hash
 
-SQLALCHEMY_DATABASE_URL = f"postgresql+psycopg://{settings.POSTGRESQL_USERNAME}:{settings.POSTGRESQL_PASSWORD}@{settings.POSTGRESQL_HOSTNAME}:{settings.POSTGRESQL_PORT}/"
+SQLALCHEMY_DATABASE_URL = f"postgresql+psycopg://{settings.POSTGRESQL_USERNAME}:{settings.POSTGRESQL_PASSWORD}@{settings.POSTGRESQL_HOSTNAME}:{settings.POSTGRESQL_PORT}/test_db"
 
 # global application scope.  create Session class, engine
 Session = sessionmaker()
@@ -18,6 +19,9 @@ Session = sessionmaker()
 engine = create_engine(SQLALCHEMY_DATABASE_URL)
 
 faker = Faker()
+
+Base.metadata.drop_all(engine)
+Base.metadata.create_all(engine)
 
 
 @pytest.fixture

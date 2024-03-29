@@ -15,7 +15,7 @@ class Base(DeclarativeBase):
     pass
 
 
-storage = FileSystemStorage(path=settings.tmp_dir)
+storage = FileSystemStorage(path=settings.photo_dir)
 
 
 def get_db():

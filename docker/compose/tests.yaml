@@ -1,7 +1,7 @@
 services:
   tests:
     container_name: hr_tests
-    image: hr-tests
+    image: hr-app
     build:
       context: ${PWD}
       dockerfile: docker/Dockerfile
@@ -12,8 +12,8 @@ services:
       - ${PWD}/:/humanRecognizer
     env_file:
       - ${PWD}/.env
-#    environment:
-#      - DJANGO_TESTS_RUNNING=1
+    environment:
+      - TESTS_RUNNING=True
     depends_on:
       postgres:
         condition: service_healthy

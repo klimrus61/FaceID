@@ -196,7 +196,7 @@ class TestPhotoApi:
         photo = Photo(
             title=title,
             description=faker.text(),
-            owner_id=user.id,
+            uploaded_by_id=user.id,
             file=UploadFile(
                 filename=title,
                 file=binary_image,

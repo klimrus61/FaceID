@@ -1,3 +1,4 @@
+import os
 import warnings
 from pathlib import Path
 from typing import Literal
@@ -16,7 +17,16 @@ class Settings(BaseSettings):
     admin_email: str = "admin@admin.com"
     items_per_user: int = 50
     base_dir: Path = Path(__file__).parent.parent
-    tmp_dir: Path = Path(base_dir.parent, "tmp")
+    # photo_dir: Path = Path(base_dir.parent, "tmp")
+    TESTS_RUNNING: bool = os.getenv("TESTS_RUNNING", False)
+
+    @computed_field
+    @property
+    def photo_dir(self) -> Path:
+        if self.TESTS_RUNNING:
+            return Path(self.base_dir.parent, "tmp")
+        return Path(self.base_dir.parent, "images")
+
     SECRET_KEY: str
     ALGORITHM: str
     ACCESS_TOKEN_EXPIRE_MINUTES: int

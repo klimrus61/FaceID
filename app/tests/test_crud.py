@@ -21,27 +21,27 @@ def default_photo():
 
 
 @pytest.fixture()
-def photo_owner(session):
+def photo_uploaded_by(session):
     user = UserCreate(email=faker.email(), password=faker.password(length=12))
     return create_user(session, user)
 
 
 @pytest.fixture()
-def photo_in_db(session, photo_owner, default_photo):
+def photo_in_db(session, photo_uploaded_by, default_photo):
     title = faker.file_name(category="image")
     photo = PhotoCreate(
         title=title,
         description=faker.text(max_nb_chars=25),
         file=UploadFile(filename=title, file=default_photo),  # noqa
     )
-    return create_photo(session, photo, photo_owner)
+    return create_photo(session, photo, photo_uploaded_by)
 
 
 # ============================================= Photo ===================================================
 
 
 class TestPhoto:
-    def test_create_photo(self, session, default_photo, photo_owner):
+    def test_create_photo(self, session, default_photo, photo_uploaded_by):
         title = faker.file_name(category="image")
         description = faker.text()
         image = UploadFile(filename=title, file=default_photo)  # noqa
@@ -49,7 +49,7 @@ class TestPhoto:
         photo = create_photo(
             session,
             PhotoCreate(title=title, description=description, file=image),
-            uploaded_by=photo_owner,
+            uploaded_by=photo_uploaded_by,
         )
         assert hasattr(photo, "id") and photo.file.name == image.filename
 
