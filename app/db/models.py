@@ -1,6 +1,8 @@
+from typing import List
+
 from fastapi_storages.integrations.sqlalchemy import ImageType
 from sqlalchemy import Boolean, Column, ForeignKey, Integer, String, Table
-from sqlalchemy.orm import relationship
+from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from .database import Base, storage
 
@@ -15,14 +17,16 @@ user_to_photo = Table(
 class User(Base):
     __tablename__ = "users"
 
-    id = Column(Integer, primary_key=True)
-    email = Column(String, unique=True, index=True)
-    hashed_password = Column(String)
-    is_active = Column(Boolean, default=True)
+    id: Mapped[int] = mapped_column(primary_key=True)
+    email: Mapped[str] = mapped_column(unique=True, index=True)
+    hashed_password: Mapped[str] = mapped_column()
+    is_active: Mapped[bool] = mapped_column(default=True)
 
-    on_photos = relationship("Photo", secondary="user_to_photo", back_populates="users")
-    uploaded_photos = relationship("Photo", back_populates="uploaded_by")
-    own_albums = relationship("Album", back_populates="owner")
+    on_photos: Mapped[List["Photo"]] = relationship(
+        secondary="user_to_photo", back_populates="users"
+    )
+    uploaded_photos: Mapped[List["Photo"]] = relationship(back_populates="uploaded_by")
+    own_albums: Mapped[List["Album"]] = relationship(back_populates="owner")
 
 
 class Album(Base):

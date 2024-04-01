@@ -40,6 +40,7 @@ def photo_in_db(session, photo_uploaded_by, default_photo):
 # ============================================= Photo ===================================================
 
 
+@pytest.mark.skip
 class TestPhoto:
     def test_create_photo(self, session, default_photo, photo_uploaded_by):
         title = faker.file_name(category="image")

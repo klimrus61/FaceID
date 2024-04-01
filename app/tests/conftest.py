@@ -2,18 +2,19 @@ import pytest
 from faker import Faker
 from fastapi.testclient import TestClient
 from sqlalchemy import create_engine
+from sqlalchemy.ext.asyncio import async_sessionmaker, create_async_engine
 from sqlalchemy.orm import sessionmaker
 
 from app.core.config import settings
-from app.db.database import Base, get_db
+from app.db.database import Base, get_db_session
 from app.main import app
 
 SQLALCHEMY_DATABASE_URL = f"postgresql+psycopg://{settings.POSTGRESQL_USERNAME}:{settings.POSTGRESQL_PASSWORD}@{settings.POSTGRESQL_HOSTNAME}:{settings.POSTGRESQL_PORT}/hr_test_db"
 
 # global application scope.  create Session class, engine
-Session = sessionmaker()
+Session = async_sessionmaker()
 
-engine = create_engine(SQLALCHEMY_DATABASE_URL)
+engine = create_async_engine(SQLALCHEMY_DATABASE_URL)
 
 faker = Faker()
 
@@ -54,6 +55,6 @@ def client(session):
     def override_get_db():
         yield session
 
-    app.dependency_overrides[get_db] = override_get_db
+    app.dependency_overrides[get_db_session] = override_get_db
     yield TestClient(app)
-    del app.dependency_overrides[get_db]
+    del app.dependency_overrides[get_db_session]
