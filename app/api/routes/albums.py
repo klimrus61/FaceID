@@ -27,7 +27,7 @@ async def get_user_albums_by_id(
     return get_user_albums(session, user_id, skip, limit)
 
 
-@router.post("/create", status_code=status.HTTP_201_CREATED)
+@router.post("/", status_code=status.HTTP_201_CREATED)
 async def create_album_to_user(
     session: Annotated[Session, Depends(get_db)],
     user: Annotated[User, Depends(get_current_active_user)],
@@ -36,7 +36,7 @@ async def create_album_to_user(
     return create_album(session, owner=user, album=album)
 
 
-@router.delete("/{album_id}/delete", status_code=status.HTTP_204_NO_CONTENT)
+@router.delete("/{album_id}", status_code=status.HTTP_204_NO_CONTENT)
 async def delete_album_by_id(
     session: Annotated[Session, Depends(get_db)],
     user: Annotated[User, Depends(get_current_active_user)],
@@ -55,7 +55,7 @@ async def delete_album_by_id(
     delete_album(session, album)
 
 
-@router.put("/{album_id}/update")
+@router.put("/{album_id}")
 async def update_album_by_id(
     session: Annotated[Session, Depends(get_db)],
     album_id: int,

@@ -30,7 +30,7 @@ async def read_current_user_photos(
     return get_user_photos(session, user, skip, limit)
 
 
-@router.post("/create", response_model=Photo)
+@router.post("/", response_model=Photo)
 async def add_photo_to_current_user(
     session: Annotated[Session, Depends(get_db)],
     user: Annotated[User, Depends(get_current_active_user)],
@@ -42,7 +42,7 @@ async def add_photo_to_current_user(
     return create_photo(session, photo=photo_in, uploaded_by=user)
 
 
-@router.delete("/{photo_id}/delete", status_code=status.HTTP_204_NO_CONTENT)
+@router.delete("/{photo_id}", status_code=status.HTTP_204_NO_CONTENT)
 async def delete_photo_by_id(
     photo_id: int,
     user: Annotated[User, Depends(get_current_active_user)],

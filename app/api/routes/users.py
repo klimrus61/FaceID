@@ -12,13 +12,11 @@ router = APIRouter()
 
 
 @router.get("/me", response_model=User)
-async def read_users_me(
-    current_user: Annotated[User, Depends(get_current_active_user)]
-):
+async def get_me(current_user: Annotated[User, Depends(get_current_active_user)]):
     return current_user
 
 
-@router.post("/create", response_model=User)
+@router.post("/", response_model=User)
 async def create_user_by_email(
     session: Annotated[Session, Depends(get_db)], user_in: UserCreate
 ):
