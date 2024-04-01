@@ -145,13 +145,13 @@ class TestAlbumApi:
         )
         data = response.json()
 
-        assert (
-            response.status_code == 200
-            and data["title"] == new_title
-            and data["description"] == new_description
-            and data["is_display"] == is_display
-            and data["owner_id"] == user.id
-        )
+        assert response.status_code == 200 and data == {
+            "id": album.id,
+            "title": new_title,
+            "description": new_description,
+            "is_display": is_display,
+            "owner_id": user.id,
+        }
 
 
 class TestLoginApi:
