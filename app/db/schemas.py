@@ -29,17 +29,6 @@ class Photo(PhotoBase):
     users: list[UserForPhoto] | None
 
 
-#
-#
-# class User(UserBase):
-#     id: int
-#     is_active: bool
-#     photos: list[Photo] = []
-#
-#     class Config:
-#         orm_mode = True
-
-
 class UserCreate(UserBase):
     password: str
 
