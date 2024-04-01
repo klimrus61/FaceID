@@ -3,7 +3,6 @@ from datetime import timedelta
 from typing import NamedTuple
 
 import pytest
-from faker import Faker
 from fastapi import UploadFile
 from fastapi.security import OAuth2PasswordRequestForm
 from PIL import Image
@@ -12,11 +11,8 @@ from app.core.config import settings
 from app.db.models import Album, Photo, User
 from app.db.schemas import Token
 from app.main import app
+from app.tests.conftest import faker
 from app.utils import create_access_token, get_password_hash
-
-faker = Faker()
-
-api_url = settings.API_V1_STR
 
 
 class UserRawPassword(NamedTuple):
@@ -68,7 +64,7 @@ class TestUsersApi:
         password = faker.password()
 
         response = client.post(
-            f"{api_url}/users/create",
+            app.url_path_for("create_user_by_email"),
             json={
                 "email": email,
                 "password": password,
@@ -79,7 +75,7 @@ class TestUsersApi:
 
     def test_get_user(self, client, user, token):
         response = client.get(
-            f"{api_url}/users/me",
+            app.url_path_for("get_me"),
             headers={"Authorization": f"Bearer {token.access_token}"},
         )
         data = response.json()
@@ -95,7 +91,7 @@ class TestAlbumApi:
 
     def test_get_user_albums(self, client, album, user):
         response = client.get(
-            f"{api_url}/albums",
+            app.url_path_for("get_user_albums_by_id"),
             params={
                 "user_id": user.id,
                 "skip": 0,
@@ -110,7 +106,7 @@ class TestAlbumApi:
         title = faker.name()
         description = faker.text()
         response = client.post(
-            f"{api_url}/albums/create",
+            app.url_path_for("create_album_to_user"),
             headers={"Authorization": f"Bearer {token.access_token}"},
             json={
                 "title": title,
@@ -127,7 +123,7 @@ class TestAlbumApi:
 
     def test_delete_album(self, client, token, album):
         response = client.delete(
-            f"{api_url}/albums/{album.id}/delete",
+            app.url_path_for("delete_album_by_id", album_id=album.id),
             headers={"Authorization": f"Bearer {token.access_token}"},
         )
 
@@ -139,7 +135,7 @@ class TestAlbumApi:
         is_display = faker.boolean()
 
         response = client.put(
-            f"{api_url}/albums/{album.id}/update",
+            app.url_path_for("update_album_by_id", album_id=album.id),
             headers={"Authorization": f"Bearer {token.access_token}"},
             json={
                 "title": new_title,
@@ -175,7 +171,7 @@ class TestLoginApi:
         del app.dependency_overrides[OAuth2PasswordRequestForm]
 
     def test_login(self, client):
-        response = client.post(f"{api_url}/token")
+        response = client.post(app.url_path_for("login_for_access_token"))
 
         assert response.status_code == 200
         token: Token = response.json()
@@ -214,7 +210,7 @@ class TestPhotoApi:
             "file": (faker.file_name(category="image"), binary_image),
         }
         response = client.post(
-            f"{api_url}/photos/create",
+            app.url_path_for("add_photo_to_current_user"),
             files=multipart_form_data,
             headers={"Authorization": f"Bearer {token.access_token}"},
         )
@@ -226,7 +222,7 @@ class TestPhotoApi:
 
     def test_get_user_photos(self, client, token):
         response = client.get(
-            f"{api_url}/photos/",
+            app.url_path_for("read_current_user_photos"),
             headers={"Authorization": f"Bearer {token.access_token}"},
             params={"skip": 0, "limit": 100},
         )
@@ -235,7 +231,7 @@ class TestPhotoApi:
 
     def test_delete_photo(self, session, client, token, photo_in_db):
         response = client.delete(
-            f"{api_url}/photos/{photo_in_db.id}/delete",
+            app.url_path_for("delete_photo_by_id", photo_id=photo_in_db.id),
             headers={"Authorization": f"Bearer {token.access_token}"},
         )
 
@@ -247,7 +243,7 @@ class TestPhotoApi:
         assert session.get(Photo, photo_in_db.id).album_id is None
 
         response = client.patch(
-            f"{api_url}/photos/{photo_in_db.id}/set-album",
+            app.url_path_for("patch_photo_album", photo_id=photo_in_db.id),
             headers={"Authorization": f"Bearer {token.access_token}"},
             params={"album_id": album.id},
         )
