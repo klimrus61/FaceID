@@ -1,5 +1,3 @@
-import tempfile
-
 import pytest
 from faker import Faker
 from fastapi.testclient import TestClient
@@ -9,7 +7,6 @@ from sqlalchemy.orm import sessionmaker
 from app.core.config import settings
 from app.db.database import Base, get_db
 from app.main import app
-from app.utils import get_password_hash
 
 SQLALCHEMY_DATABASE_URL = f"postgresql+psycopg://{settings.POSTGRESQL_USERNAME}:{settings.POSTGRESQL_PASSWORD}@{settings.POSTGRESQL_HOSTNAME}:{settings.POSTGRESQL_PORT}/hr_test_db"
 
@@ -60,15 +57,3 @@ def client(session):
     app.dependency_overrides[get_db] = override_get_db
     yield TestClient(app)
     del app.dependency_overrides[get_db]
-
-
-# @pytest.fixture(scope="function")
-# def user(session):
-#     user = User(
-#         email=faker.email(),
-#         hashed_password=get_password_hash(faker.password())
-#     )
-#     session.add(user)
-#     session.commit()
-#     session.refresh(user)
-#     return user
