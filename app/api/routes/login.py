@@ -6,7 +6,7 @@ from fastapi.security import OAuth2PasswordRequestForm
 
 from app.api.deps import DBSessionDep
 from app.core.config import settings
-from app.db.crud import authenticate_user
+from app.db.crud import UserStorage
 from app.db.schemas import Token
 from app.utils import create_access_token
 
@@ -18,7 +18,7 @@ async def login_for_access_token(
     session: DBSessionDep,
     form_data: Annotated[OAuth2PasswordRequestForm, Depends()],
 ) -> Token:
-    user = await authenticate_user(
+    user = await UserStorage.authenticate_user(
         session=session, email=form_data.username, password=form_data.password
     )
     if not user:
