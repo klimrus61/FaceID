@@ -10,7 +10,7 @@ python = "^3.12"
 fastapi = "^0.110.0"
 uvicorn = "^0.28.0"
 pydantic-settings = "^2.2.1"
-sqlalchemy = "^2.0.28"
+sqlalchemy = {extras = ["asyncio"], version = "^2.0.29"}
 fastapi-storages = "^0.3.0"
 sqlalchemy-stubs = "^0.4"
 alembic = "^1.13.1"
@@ -18,11 +18,14 @@ python-multipart = "^0.0.9"
 python-jose = {extras = ["cryptography"], version = "^3.3.0"}
 passlib = {extras = ["bcrypt@4.0.1"], version = "^1.7.4"}
 pillow = "^10.2.0"
-pytest = {extras = ["httpx"], version = "^8.1.1"}
+pytest = {extras = ["pytest-asyncio"], version = "^8.1.1"}
 httpx = "^0.27.0"
 faker = "^24.3.0"
 psycopg = "^3.1.18"
 face-recognition = "^1.3.0"
+anyio = {extras = ["trio"], version = "^4.3.0"}
+trio = "^0.25.0"
+pytest-asyncio = "^0.23.6"
 
 
 [tool.poetry.group.dev.dependencies]
@@ -39,6 +42,7 @@ build-backend = "poetry.core.masonry.api"
 profile = "black"
 
 [tool.pytest.ini_options]
+asyncio_mode = "auto"
 addopts = "-vv -x --lf --color=yes"
 console_output_style = "progress"
 testpaths = [

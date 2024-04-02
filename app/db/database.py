@@ -20,11 +20,11 @@ storage = FileSystemStorage(path=settings.photo_dir)
 
 
 async def get_db_session():
-    session = SessionLocal()
-    try:
+    async with SessionLocal() as session:
+        # try:
         yield session
-    except Exception:
-        await session.rollback()
-        raise
-    finally:
-        await session.close()
+        # except Exception:
+        #     await session.rollback()
+        #     raise
+        # finally:
+        #     await session.close()

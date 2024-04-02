@@ -34,6 +34,11 @@ async def create_album_to_user(
     return await create_album(session, owner=user, album=album)
 
 
+@router.get("/{album_id}")
+async def get_album_by_id(session: DBSessionDep, album_id: int):
+    return await get_album(session, album_id)
+
+
 @router.delete("/{album_id}", status_code=status.HTTP_204_NO_CONTENT)
 async def delete_album_by_id(
     session: DBSessionDep,

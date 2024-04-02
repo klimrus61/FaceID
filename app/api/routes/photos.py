@@ -7,9 +7,11 @@ from app.db.crud import (
     change_photo_album,
     create_photo,
     delete_photo,
+    get_album,
     get_photo,
     get_single_owner_photos,
     get_user_photos,
+    get_users_from_photo,
     set_on_photo_only_owner,
 )
 from app.db.schemas import Photo, PhotoCreate, User
@@ -28,7 +30,7 @@ async def read_current_user_photos(
     return await get_user_photos(session, user, skip, limit)
 
 
-@router.post("/", response_model=Photo)
+@router.post("/")
 async def add_photo_to_current_user(
     session: DBSessionDep,
     user: Annotated[User, Depends(get_current_active_user)],
@@ -38,6 +40,24 @@ async def add_photo_to_current_user(
 ):
     photo_in = PhotoCreate(title=title, description=description, file=file)
     return await create_photo(session, photo=photo_in, uploaded_by=user)
+
+
+@router.get("/only-created-by-current-user")
+async def get_photos_there_only_owner(
+    session: DBSessionDep,
+    user: Annotated[User, Depends(get_current_active_user)],
+):
+    photos = await get_single_owner_photos(session, user)
+    return photos
+
+
+@router.get("/{photo_id}", response_model=Photo)
+async def get_photo_by_id(
+    session: DBSessionDep,
+    photo_id: int,
+):
+    users_on_photo = await get_users_from_photo(session, photo_id)
+    return users_on_photo
 
 
 @router.delete("/{photo_id}", status_code=status.HTTP_204_NO_CONTENT)
@@ -68,9 +88,14 @@ async def patch_photo_album(
     photo = await get_photo(session, photo_id)
     if not photo:
         raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
+            status_code=status.HTTP_404_NOT_FOUND, detail="Photo does not exist"
         )
-    return await change_photo_album(session, photo, album_id)
+    album = await get_album(session, album_id)
+    if not album:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND, detail="Album does not exist"
+        )
+    return await change_photo_album(session, photo, album)
 
 
 @router.patch("/{photo_id}/set-it-is-me")
@@ -80,10 +105,12 @@ async def patch_photo_me(
     photo_id: int,
 ):
     photo = await get_photo(session, photo_id)
+    if photo is None:
+        raise HTTPException(status_code=404, detail="photo not found")
     if photo.uploaded_by != user:
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
-            detail="You do not have permission to delete this photo",
+            detail="You do not have permission to set up user on this photo this photo",
         )
     if not await is_one_person_on_photo(photo):
         raise HTTPException(
@@ -98,11 +125,3 @@ async def patch_photo_me(
                 detail=f"The person on this photo not the user: {user.email}",
             )
     return await set_on_photo_only_owner(session, photo)
-
-
-@router.get("/only-created-by-current-user")
-async def get_photos_there_only_owner(
-    session: DBSessionDep,
-    user: Annotated[User, Depends(get_current_active_user)],
-):
-    return await get_single_owner_photos(session, user)

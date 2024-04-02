@@ -2,6 +2,10 @@
 
 1. Make sure to copy the latest **.env** file to your project directory (you can find .env in our backend telagram chat, just look for the latest **#env**).
 
+[!HINT]
+> To create secret for app use \
+> **openssl rand -hex 32**
+
 2. Make sure you have **Docker Desktop** installed. To see the docs to get started go to [https://www.docker.com/get-started](https://www.docker.com/get-started)
 
 3. To create and start the containers run the following commands:

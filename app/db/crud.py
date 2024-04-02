@@ -1,7 +1,8 @@
 from typing import Type
 
-from sqlalchemy import select, update
+from sqlalchemy import func, select, update
 from sqlalchemy.ext.asyncio import AsyncSession
+from sqlalchemy.orm import relationships, selectinload
 
 from app.db import models, schemas
 from app.utils import get_password_hash, verify_password
@@ -19,18 +20,22 @@ async def add_db_entity(session: AsyncSession, db_entity: Type[models.Base]):
 
 async def get_user(session: AsyncSession, user_id: int) -> models.User:
     stmt = select(models.User).where(models.User.id == user_id)
-    return await session.scalar(stmt)
+    result = await session.execute(stmt)
+    return result.scalar()
 
 
 async def get_user_by_email(session: AsyncSession, email: str) -> models.User:
     stmt = select(models.User).where(models.User.email == email)
-    return await session.scalar(stmt)
+    result = await session.execute(stmt)
+    return result.scalar()
 
 
 async def get_users(
-    session: AsyncSession, skip: int = 0, limit: int = 100
+    session: AsyncSession, offset: int, limit: int
 ) -> list[models.User]:
-    return await session.scalars(models.User).offset(skip).fetch(limit)
+    stmt = select(models.User).offset(offset).limit(limit)
+    result = await session.execute(stmt)
+    return result.scalars().all()
 
 
 async def create_user(session: AsyncSession, user: schemas.UserCreate):
@@ -50,6 +55,12 @@ async def authenticate_user(session: AsyncSession, email: str, password: str):
 # ================================= Photo ============================================
 
 
+async def get_photo(session: AsyncSession, photo_id: int) -> models.Photo:
+    stmt = select(models.Photo).where(models.Photo.id == photo_id)
+    result = await session.execute(stmt)
+    return result.scalar()
+
+
 async def create_photo(
     session: AsyncSession, photo: schemas.PhotoCreate, uploaded_by: schemas.User
 ):
@@ -60,8 +71,14 @@ async def create_photo(
     return db_photo
 
 
-async def get_photo(session: AsyncSession, photo_id: int) -> models.Photo | None:
-    return await session.get(models.Photo, photo_id)
+async def get_users_from_photo(session: AsyncSession, photo_id: int):
+    stmt = (
+        select(models.Photo)
+        .where(models.Photo.id == photo_id)
+        .options(selectinload(models.Photo.users))
+    )
+    result = await session.execute(stmt)
+    return result.scalar()
 
 
 async def delete_photo(session: AsyncSession, photo: models.Photo):
@@ -72,34 +89,48 @@ async def delete_photo(session: AsyncSession, photo: models.Photo):
 async def get_user_photos(
     session: AsyncSession, user: schemas.User, skip: int, limit: int
 ) -> list[models.Photo]:
-    stmt = select(models.Photo).where(models.Photo.uploaded_by == user)
-    return await session.scalars(stmt).offset(skip).fetch(limit)
+    stmt = (
+        select(models.Photo)
+        .where(models.Photo.uploaded_by_id == user.id)
+        .offset(skip)
+        .limit(limit)
+    )
+    result = await session.execute(stmt)
+    return result.scalars().all()
 
 
 async def change_photo_album(
     session: AsyncSession,
     photo: models.Photo,
-    album_id: int,
+    album: models.Album,
 ) -> models.Photo:
-    photo.album_id = album_id
+    photo.album = album
     session.add(photo)
     await session.commit()
     await session.refresh(photo)
     return photo
 
 
-async def get_single_owner_photos(session: AsyncSession, user: schemas.User):
-    stmt = (
-        select(models.Photo)
-        .where(models.Photo.uploaded_by == user)
-        .where(models.Photo.users.any(id=user.id))
+async def get_single_owner_photos(
+    session: AsyncSession, user: models.User
+) -> list[models.Photo] | None:
+    subquery = (
+        select(models.user_to_photo.c.photo_id)
+        .group_by(models.user_to_photo.c.photo_id)
+        .having(func.count(models.user_to_photo.c.user_id) == 1)
     )
-    return await session.scalars(stmt)
+    query = select(models.Photo).where(
+        (models.Photo.uploaded_by == user) & (models.Photo.id.in_(subquery))
+    )
+    result = await session.execute(query)
+    return result.scalars().all()
 
 
 async def set_on_photo_only_owner(session: AsyncSession, photo: models.Photo):
-    photo.users.append(photo.uploaded_by)
-    session.add(photo)
+    await session.execute(
+        models.user_to_photo.insert(),
+        [{"user_id": photo.uploaded_by_id, "photo_id": photo.id}],
+    )
     await session.commit()
     await session.refresh(photo)
     return photo
@@ -111,8 +142,14 @@ async def set_on_photo_only_owner(session: AsyncSession, photo: models.Photo):
 async def get_user_albums(
     session: AsyncSession, user_id, skip: int, limit: int
 ) -> list[models.Album]:
-    stmt = select(models.Album).where(models.Album.owner_id == user_id)
-    return await session.scalars(stmt).offset(skip).fetch(limit)
+    stmt = (
+        select(models.Album)
+        .where(models.Album.owner_id == user_id)
+        .offset(skip)
+        .limit(limit)
+    )
+    result = await session.execute(stmt)
+    return result.scalars().all()
 
 
 async def create_album(

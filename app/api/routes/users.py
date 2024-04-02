@@ -3,7 +3,7 @@ from typing import Annotated
 from fastapi import APIRouter, Depends, HTTPException
 
 from app.api.deps import DBSessionDep, get_current_active_user
-from app.db.crud import create_user, get_user_by_email
+from app.db.crud import create_user, get_user_by_email, get_users
 from app.db.schemas import User, UserCreate
 
 router = APIRouter()
@@ -24,3 +24,8 @@ async def create_user_by_email(session: DBSessionDep, user_in: UserCreate):
         )
     user = await create_user(session, user=user_in)
     return user
+
+
+@router.get("/", response_model=list[User])
+async def get_all_users(session: DBSessionDep, offset: int = 0, limit: int = 100):
+    return await get_users(session, offset, limit)
