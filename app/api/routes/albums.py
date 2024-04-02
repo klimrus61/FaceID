@@ -19,10 +19,10 @@ router = APIRouter()
 async def get_user_albums_by_id(
     session: DBSessionDep,
     user_id: int,
-    skip: int = 0,
+    offset: int = 0,
     limit: int = 100,
 ):
-    return await get_user_albums(session, user_id, skip, limit)
+    return await get_user_albums(session, user_id, offset, limit)
 
 
 @router.post("/", status_code=status.HTTP_201_CREATED)

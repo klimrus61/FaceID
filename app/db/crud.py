@@ -87,12 +87,12 @@ async def delete_photo(session: AsyncSession, photo: models.Photo):
 
 
 async def get_user_photos(
-    session: AsyncSession, user: schemas.User, skip: int, limit: int
+    session: AsyncSession, user: schemas.User, offset: int, limit: int
 ) -> list[models.Photo]:
     stmt = (
         select(models.Photo)
         .where(models.Photo.uploaded_by_id == user.id)
-        .offset(skip)
+        .offset(offset)
         .limit(limit)
     )
     result = await session.execute(stmt)
@@ -140,12 +140,12 @@ async def set_on_photo_only_owner(session: AsyncSession, photo: models.Photo):
 
 
 async def get_user_albums(
-    session: AsyncSession, user_id, skip: int, limit: int
+    session: AsyncSession, user_id, offset: int, limit: int
 ) -> list[models.Album]:
     stmt = (
         select(models.Album)
         .where(models.Album.owner_id == user_id)
-        .offset(skip)
+        .offset(offset)
         .limit(limit)
     )
     result = await session.execute(stmt)

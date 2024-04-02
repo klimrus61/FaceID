@@ -24,10 +24,10 @@ router = APIRouter()
 async def read_current_user_photos(
     session: DBSessionDep,
     user: Annotated[User, Depends(get_current_active_user)],
-    skip: int = 0,
+    offset: int = 0,
     limit: int = 100,
 ):
-    return await get_user_photos(session, user, skip, limit)
+    return await get_user_photos(session, user, offset, limit)
 
 
 @router.post("/")
