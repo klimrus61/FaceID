@@ -25,7 +25,9 @@ class User(Base):
     on_photos: Mapped[List["Photo"]] = relationship(
         secondary="user_to_photo", back_populates="users"
     )
-    uploaded_photos: Mapped[List["Photo"]] = relationship(back_populates="uploaded_by")
+    uploaded_photos: Mapped[List["Photo"]] = relationship(
+        "Photo", back_populates="uploaded_by"
+    )
     own_albums: Mapped[List["Album"]] = relationship(back_populates="owner")
 
     def __repr__(self) -> str:

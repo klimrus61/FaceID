@@ -1,6 +1,8 @@
+from typing import Sequence
+
 import face_recognition
 
-from app.db.schemas import Photo
+from app.db.models import Photo
 
 
 async def is_one_person_on_photo(photo: Photo):
@@ -9,7 +11,7 @@ async def is_one_person_on_photo(photo: Photo):
     return len(face_locations) == 1
 
 
-async def is_person_same(photos_of_person: list[Photo], unknown_person: Photo):
+async def is_person_same(photos_of_person: Sequence[Photo], unknown_person: Photo):
     known_images = []
     for photo in photos_of_person:
         known_images.append(face_recognition.load_image_file(photo.file))

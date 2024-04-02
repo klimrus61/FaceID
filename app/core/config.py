@@ -20,8 +20,8 @@ class Settings(BaseSettings):
     # photo_dir: Path = Path(base_dir.parent, "tmp")
     TESTS_RUNNING: bool = os.getenv("TESTS_RUNNING", False)
 
-    @computed_field
     @property
+    @computed_field
     def photo_dir(self) -> Path:
         if self.TESTS_RUNNING:
             return Path(self.base_dir.parent, "tmp")
@@ -38,8 +38,8 @@ class Settings(BaseSettings):
     POSTGRESQL_PORT: int
     POSTGRESQL_DB_NAME: str
 
-    @computed_field
     @property
+    @computed_field
     def SQLALCHEMY_DATABASE_URI(self) -> PostgresDsn:
         return MultiHostUrl.build(
             scheme="postgresql+psycopg",

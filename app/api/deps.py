@@ -6,7 +6,8 @@ from jose import JWTError, jwt
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.config import settings
-from app.db.crud import get_user_by_email
+from app.core.exeptions import CredentialsException
+from app.db.crud import UserStorage as US
 from app.db.database import get_db_session
 from app.db.schemas import TokenData, User
 
@@ -20,24 +21,19 @@ async def get_current_user(
     session: DBSessionDep,
     token: Annotated[str, Depends(oauth2_scheme)],
 ):
-    credentials_exception = HTTPException(
-        status_code=status.HTTP_401_UNAUTHORIZED,
-        detail="Could not validate credentials",
-        headers={"WWW-Authenticate": "Bearer"},
-    )
     try:
         payload = jwt.decode(
             token, settings.SECRET_KEY, algorithms=[settings.ALGORITHM]
         )
         email: str = payload.get("sub")
         if email is None:
-            raise credentials_exception
+            raise CredentialsException
         token_data = TokenData(email=email)
     except JWTError:
-        raise credentials_exception
-    user = await get_user_by_email(session, email=token_data.email)
+        raise CredentialsException
+    user = await US.get_user_by_email(session, email=token_data.email)
     if user is None:
-        raise credentials_exception
+        raise CredentialsException
     return user
 
 

@@ -12,7 +12,6 @@ uvicorn = "^0.28.0"
 pydantic-settings = "^2.2.1"
 sqlalchemy = {extras = ["asyncio"], version = "^2.0.29"}
 fastapi-storages = "^0.3.0"
-sqlalchemy-stubs = "^0.4"
 alembic = "^1.13.1"
 python-multipart = "^0.0.9"
 python-jose = {extras = ["cryptography"], version = "^3.3.0"}
@@ -55,7 +54,8 @@ python_files = [
 ]
 
 [tool.mypy]
-
+files = ["**/*.py"]
+plugins = "sqlalchemy.ext.mypy.plugin"
 ignore_missing_imports = true
 warn_return_any = true
 warn_unused_configs = true

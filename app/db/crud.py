@@ -1,4 +1,4 @@
-from typing import Type
+from typing import Sequence, Type
 
 from sqlalchemy import func, select, update
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -20,13 +20,15 @@ async def add_db_entity(session: AsyncSession, db_entity: Type[models.Base]):
 
 class UserStorage:
     @staticmethod
-    async def get_user(session: AsyncSession, user_id: int) -> models.User:
+    async def get_user(session: AsyncSession, user_id: int) -> models.User | None:
         stmt = select(models.User).where(models.User.id == user_id)
         result = await session.execute(stmt)
         return result.scalar()
 
     @staticmethod
-    async def get_user_by_email(session: AsyncSession, email: str) -> models.User:
+    async def get_user_by_email(
+        session: AsyncSession, email: str
+    ) -> models.User | None:
         stmt = select(models.User).where(models.User.email == email)
         result = await session.execute(stmt)
         return result.scalar()
@@ -34,7 +36,7 @@ class UserStorage:
     @staticmethod
     async def get_users(
         session: AsyncSession, offset: int, limit: int
-    ) -> list[models.User]:
+    ) -> Sequence[models.User]:
         stmt = select(models.User).offset(offset).limit(limit)
         result = await session.execute(stmt)
         return result.scalars().all()
@@ -61,7 +63,7 @@ class UserStorage:
 
 class PhotoStorage:
     @staticmethod
-    async def get_photo(session: AsyncSession, photo_id: int) -> models.Photo:
+    async def get_photo(session: AsyncSession, photo_id: int) -> models.Photo | None:
         stmt = select(models.Photo).where(models.Photo.id == photo_id)
         result = await session.execute(stmt)
         return result.scalar()
@@ -96,7 +98,7 @@ class PhotoStorage:
     @staticmethod
     async def get_user_photos(
         session: AsyncSession, user: schemas.User, offset: int, limit: int
-    ) -> list[models.Photo]:
+    ) -> Sequence[models.Photo]:
         stmt = (
             select(models.Photo)
             .where(models.Photo.uploaded_by_id == user.id)
@@ -120,8 +122,8 @@ class PhotoStorage:
 
     @staticmethod
     async def get_single_owner_photos(
-        session: AsyncSession, user: models.User
-    ) -> list[models.Photo] | None:
+        session: AsyncSession, user: schemas.User
+    ) -> Sequence[models.Photo] | None:
         subquery = (
             select(models.user_to_photo.c.photo_id)
             .group_by(models.user_to_photo.c.photo_id)
@@ -151,7 +153,7 @@ class AlbumStorage:
     @staticmethod
     async def get_user_albums(
         session: AsyncSession, user_id, offset: int, limit: int
-    ) -> list[models.Album]:
+    ) -> Sequence[models.Album]:
         stmt = (
             select(models.Album)
             .where(models.Album.owner_id == user_id)
