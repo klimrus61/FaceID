@@ -43,7 +43,7 @@ class UserStorage:
 
     @staticmethod
     async def create_user(session: AsyncSession, user: schemas.UserCreate):
-        hashed_password = get_password_hash(user.password)
+        hashed_password = await get_password_hash(user.password)
         db_user = models.User(email=user.email, hashed_password=hashed_password)
         session.add(db_user)
         await session.commit()
@@ -54,7 +54,9 @@ class UserStorage:
     async def authenticate_user(session: AsyncSession, email: str, password: str):
         user = await UserStorage.get_user_by_email(session, email)
         return (
-            user if user and verify_password(password, user.hashed_password) else False
+            user
+            if user and await verify_password(password, user.hashed_password)
+            else False
         )
 
 
