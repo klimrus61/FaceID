@@ -53,8 +53,8 @@ class Photo(Base):
     id: Mapped[int] = mapped_column(primary_key=True)
     title: Mapped[str] = mapped_column(index=True)
     description: Mapped[str] = mapped_column()
-    file: Mapped[ImageType] = mapped_column(ImageType(storage=storage))
-    album_id: Mapped[int] = mapped_column(ForeignKey("albums.id"))
+    file = Column(ImageType(storage=storage))
+    album_id: Mapped[int | None] = mapped_column(ForeignKey("albums.id"))
     uploaded_by_id: Mapped[int] = mapped_column(ForeignKey("users.id"))
 
     uploaded_by: Mapped["User"] = relationship(back_populates="uploaded_photos")

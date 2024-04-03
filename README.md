@@ -43,7 +43,7 @@
 > Before running tests you have to create test db **hr_test_db** or rewrite db_url for your tests in app.tests.conftest.py
 
 ```bash
-make tests
+make foo
 ```
 
 :exclamation: Every new peace of code that you write, whether its a new exception handler in an existing endpoint or a new endpoint overall, make sure to cover it with tests.

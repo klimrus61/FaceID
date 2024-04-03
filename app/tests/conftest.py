@@ -10,7 +10,7 @@ from app.main import app
 
 SQLALCHEMY_DATABASE_URL = f"postgresql+psycopg://{settings.POSTGRESQL_USERNAME}:{settings.POSTGRESQL_PASSWORD}@{settings.POSTGRESQL_HOSTNAME}:{settings.POSTGRESQL_PORT}/hr_test_db"
 
-engine = create_async_engine("sqlite+aiosqlite:///./test_db.sqlite", echo=True)
+engine = create_async_engine("sqlite+aiosqlite:///./test_db.sqlite")
 async_session = async_sessionmaker(engine, expire_on_commit=False)
 
 

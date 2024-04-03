@@ -261,6 +261,8 @@ staticfiles/
 db.json
 sql_app.db
 *.db
+*.sqlite
+foo/
 test_main.http
 tmp/
 images/
